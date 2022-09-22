@@ -229,6 +229,7 @@ func (c *cacheMap) setTTL(key string, ttl time.Duration) error {
 	if !exist {
 		return ErrKeyNotExist
 	}
+	item.addTime = time.Now()
 	item.TTL = ttl
 	return nil
 }
