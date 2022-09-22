@@ -8,7 +8,7 @@ import (
 )
 
 const (
-	Version = "v0.0.1"
+	Version = "v0.0.2"
 )
 
 type cacheMap struct {
@@ -108,7 +108,7 @@ func NewCacheMap(options ...Option) CacheMap {
 	return CacheMap{c}
 }
 
-func (c *cacheMap) set(key string, value string, ttl time.Duration, cleanUpCallFunc CleanUpCallFunc) error {
+func (c *cacheMap) set(key string, value interface{}, ttl time.Duration, cleanUpCallFunc CleanUpCallFunc) error {
 	if ttl <= 0 {
 		ttl = -1
 	}
@@ -129,7 +129,7 @@ func (c *cacheMap) set(key string, value string, ttl time.Duration, cleanUpCallF
 	return nil
 }
 
-func (C CacheMap) Set(key string, value string, ttl time.Duration, cleanUpCallFunc CleanUpCallFunc) error {
+func (C CacheMap) Set(key string, value interface{}, ttl time.Duration, cleanUpCallFunc CleanUpCallFunc) error {
 	return C.set(key, value, ttl, cleanUpCallFunc)
 }
 
@@ -204,7 +204,7 @@ func (C CacheMap) Delete(key string) error {
 	return C.delete(key)
 }
 
-func (c *cacheMap) setValue(key string, value string) error {
+func (c *cacheMap) setValue(key string, value interface{}) error {
 	c.mu.Lock()
 	defer c.mu.Unlock()
 	item, exist := c.m[key]
@@ -215,7 +215,7 @@ func (c *cacheMap) setValue(key string, value string) error {
 	return nil
 }
 
-func (C CacheMap) SetValue(key string, value string) error {
+func (C CacheMap) SetValue(key string, value interface{}) error {
 	return C.setValue(key, value)
 }
 
@@ -278,6 +278,17 @@ func (c *cacheMap) clean() {
 
 func (C CacheMap) Clean() {
 	C.clean()
+}
+
+func (c *cacheMap) exist(key string) bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	_, ok := c.m[key]
+	return ok
+}
+
+func (C CacheMap) Exist(key string) bool {
+	return C.exist(key)
 }
 
 func (c *cacheMap) close() {
